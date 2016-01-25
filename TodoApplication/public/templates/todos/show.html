@@ -1,0 +1,13 @@
+<p>Title : {{selectedTodo.title}} </p>
+<ul>
+    <li ng-repeat="comment in commentList">
+      <div>
+    <label>{{comment.text}} </label>
+
+        <!-- <button class="destroy" ng-click="removeTodo(todo)" ></button> -->
+      </div>
+    </li>
+  </ul>
+  <form ng-submit="saveComment(selectedTodo.id)">
+    <input placeholder="Add Comment" ng-model = "newComment" autofocus>
+  </form>

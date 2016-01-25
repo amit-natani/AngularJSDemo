@@ -3,14 +3,13 @@ class TodosController < ApplicationController
   respond_to :html, :json
 
   def index
-
     @todo = Todo.all
     respond_with @todo
   end
 
   def show
      @todo = Todo.find(params[:id])
-     respond_with @todo
+     respond_with(@todo.as_json)
   end
 
   def create
