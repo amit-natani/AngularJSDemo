@@ -182,48 +182,130 @@ myApp.factory('Todos', ['$resource',function($resource){
 */
 
 myApp.factory('Todo', ['$resource', function($resource){
-  return $resource('/todos/:id.json', {}
-  /**, {
-    show: { method: 'GET' },
-    update: { method: 'PUT', params: {id: '@id'} },
-    delete: { method: 'DELETE', params: {id: '@id'} }
-  }
-*/
-);
+ return $resource('/todos/:id.json',{id: '@id'}, {
+   update: { method: 'PUT', params: {id: '@id'} }
+   });
 }]);
 
-myApp.factory('Comment', ['$resource', function($resource){
-  return $resource('/todos/:id/comments.json', {}
-  /**, {
-    show: { method: 'GET' },
-    update: { method: 'PUT', params: {id: '@id'} },
-    delete: { method: 'DELETE', params: {id: '@id'} }
-  }
-*/
-);
+
+myApp.factory('Comment', ['$resource',function($resource){
+ return $resource('/todos/:todo_id/comments/:id.json', {todo_id: '@todo_id', id: '@id'}
+ ,{
+   update: {method: 'PUT', params: {todo_id: '@todo_id', id: '@id'}}
+ });
 }]);
 
 
 //Controller
 
 angular.module('myApp').controller('TodoShowController',['$rootScope','$scope','$routeParams', '$filter', '$http', '$resource' ,'Todo', '$location','Comment','$route',function($rootScope,$scope,$routeParams, $filter,$http,$resource,Todo,$location, Comment,$route) {
-
+$scope.editTitle = "ng-hide";
+$scope.editDescription = "ng-hide";
+$scope.editedComment = null;
 var selectedId=$routeParams.id;
 
+alert($scope.editTitle);
 $scope.selectedTodo = Todo.get({id: selectedId });
 
-$scope.commentList = Comment.query({id: selectedId});
+$scope.commentList = Comment.query({todo_id: selectedId});
 
-$scope.saveComment = function(todoId) {
-  // Comment.save({text: $scope.newComment, todo_id: selectedId});
-  // alert("hello");
-  // $scope.newComment = "";
-  $http.post('/todos/'+todoId+'/comments', {todo_id: 20, text: $scope.newComment}).success(function() {
-       $scope.newComment = '';
-       $route.reload();
-       //$location.path("list");
-     });
-}
+  $scope.showFormForTitle = function(todo) {
+    $scope.editTitle = "ng-show";
+    $scope.editedTodoTitle = todo;
+    $scope.originalTodoTitle = angular.extend({}, todo);
+  }
+
+  $scope.showFormForDescription = function(todo) {
+    $scope.editDescription = "ng-show";
+    $scope.editedTodoDescription = todo;
+    $scope.originalTodoDescription = angular.extend({}, todo);
+  }
+
+$scope.saveComment = function() {
+ //Create the comment object to be sent to the server
+ var commentObj = new Comment({text: $scope.newComment, todo_id: $routeParams.id});
+var commentObj1 = {text: $scope.newComment, todo_id: $routeParams.id};
+ //Attempt a save to the back-end
+ commentObj.$save(function(response) {
+   $scope.commentList.push(commentObj1);
+   $scope.newComment = "";
+ });
+   //If we're successful then add the response (the object as the server sees it)
+   // to our collection of comments
+ //  $scope.commentList.unshift(response);
+ //Grab all the comments from the server
+ //$scope.commentList.push(commentObj);
+ //$scope.commentList = Comment.query({todo_id: $routeParams.id});
+
+   //Empty the name & body
+ //$scope.newComment = "";
+ //$route.reload();
+
+
+};
+   $scope.editComment = function (comment) {
+         $scope.editedComment = comment;
+         $scope.originalComment = angular.extend({}, comment);
+       };
+
+       $scope.saveEditsComment = function (comment) {
+           comment.text = comment.text.trim();
+           if (comment.text === $scope.originalComment.text) {
+             $scope.editedComment = null;
+             return;
+           }
+          Comment.update({id: comment.id, text: comment.text, todo_id: $routeParams.id}, function(){
+          $scope.commentList = Comment.query({id: $routeParams.id});
+
+           })
+           $scope.editedComment = null;
+           $scope.originalComment =null;
+             $scope.reverted = true;
+             $route.reload();
+         };
+
+             $scope.saveEditsTitle = function (todo) {
+                 todo.title = todo.title.trim();
+                 alert($scope.originalTodoTitle);
+                   if (todo.title === $scope.originalTodoTitle.title) {
+                   $scope.editedTodoTitle = null;
+                   return;
+                 }
+                Todo.update({id: todo.id, title: todo.title}, function(){
+                 //$scope.commentList = Comment.query({id: $routeParams.id});
+                 })
+                 $scope.editedTodoTitle = null;
+                 $scope.originalTodoTitle =null;
+                   $scope.reverted = true;
+                   $scope.editTitle = "ng-hide";
+                   //$route.reload();
+               };
+
+               $scope.saveEditsDescription = function (todo) {
+                   todo.description = todo.description.trim();
+                   alert($scope.originalTodoDescription);
+                     if (todo.description === $scope.originalTodoDescription.description) {
+                     $scope.editedTodoDescription = null;
+                     return;
+                   }
+                  Todo.update({id: todo.id, description: todo.description}, function(){
+                   //$scope.commentList = Comment.query({id: $routeParams.id});
+                   })
+                   $scope.editedTodoDescription = null;
+                   $scope.originalTodoDescription =null;
+                     $scope.reverted = true;
+                     $scope.editDescription = "ng-hide";
+                     //$route.reload();
+                 };
+
+         $scope.removeComment = function(comment) {
+             if (confirm("Are you sure you want to delete this Comment?"))
+             Comment.delete({id: comment.id, todo_id: $routeParams.id }, function(){
+               $scope.commentList = Comment.query({id: $routeParams.id});
+             });
+
+         };
+
 }]);
 
 
@@ -337,7 +419,6 @@ myApp.controller("TodoController", ['$rootScope','$scope', '$http', '$resource',
 
 
     $scope.saveEdits = function (todo ) {
-
         todo.title = todo.title.trim();
 
         if (todo.title === $scope.originalTodo.title) {

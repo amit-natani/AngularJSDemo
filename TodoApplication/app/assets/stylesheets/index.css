@@ -246,6 +246,36 @@ label[for='markAll'] {
 	margin-bottom: -1px;
 }
 
+#todoTitle .editing {
+	border-bottom: none;
+	padding: 0;
+}
+
+#todoTitle .editing .edit {
+	display: block;
+	width: 506px;
+	padding: 13px 17px 12px 17px;
+	margin: 0 0 0 43px;
+}
+
+#todoTitle .editing .view {
+	display: none;
+}
+
+#todoTitle span {
+	white-space: pre-line;
+	word-break: break-all;
+	padding: 15px 60px 15px 15px;
+	margin-left: 45px;
+	display: block;
+	line-height: 1.2;
+	transition: color 0.4s;
+}
+
+#todoTitle .edit {
+	display: none;
+}
+
 #footer {
 	color: #777;
 	padding: 10px 15px;

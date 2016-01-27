@@ -22,20 +22,21 @@ class CommentsController < ApplicationController
     render json: @todo.as_json, status: :ok
   end
 
-  # def update
-  #     @todo = Todo.find(params[:id])
-  #   if @todo.update_attributes(todo_params)
-  #     render json: @todo.as_json, status: :ok
-  #   else
-  #     render json: {todo: @todo.errors, status: :unprocessable_entity}
-  #   end
-  # end
-  #
-  # def destroy
-  #   @todo = Todo.find(params[:id])
-  #   @todo.destroy
-  #   render json: {status: :ok}
-  # end
+   def update
+      @comment = Comment.find(params[:id])
+      puts "Update Comment"
+   if @comment.update_attributes(comment_params)
+       render json: @todo.as_json, status: :ok
+     else
+       render json: {todo: @todo.errors, status: :unprocessable_entity}
+     end
+   end
+
+   def destroy
+       @comment = Comment.find(params[:id])
+       @comment.destroy
+       render json: {status: :ok}
+   end
 
   private
 

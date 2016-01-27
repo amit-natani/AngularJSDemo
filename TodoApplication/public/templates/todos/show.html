@@ -1,13 +1,27 @@
-<p>Title : {{selectedTodo.title}} </p>
-<ul>
-    <li ng-repeat="comment in commentList">
+<p ng-class="{editing: selectedTodo == editedTodo}">Title : <span>{{selectedTodo.title}}</span></p>
+<p ng-class="{editing: selectedTodo == editedTodo}">Description : <span>{{selectedTodo.description}}</span></p>
+<button ng-click="showFormForTitle(selectedTodo)">Edit Title</button>
+<button ng-click="showFormForDescription(selectedTodo)">Edit Description</button>
+<form ng-submit="saveEditsTitle(selectedTodo)" class = {{editTitle}}>
+  <input class="edit" ng-trim="false" ng-model="selectedTodo.title" >
+</form>
+<form ng-submit="saveEditsDescription(selectedTodo)" class = {{editDescription}}>
+  <input class="edit" ng-trim="false" ng-model="selectedTodo.description" >
+</form>
+<section id="main" ng-show="commentList.length" ng-cloak>
+  <h2> Comments </h2>
+<ul id = "todolist">
+    <li ng-repeat="comment in commentList" ng-class="{editing: comment == editedComment}">
       <div>
-    <label>{{comment.text}} </label>
-
-        <!-- <button class="destroy" ng-click="removeTodo(todo)" ></button> -->
+        <label ng-dblclick="editComment(comment)" >{{comment.text}} </label>
+        <button class="destroy" ng-click="removeComment(comment)" ></button>
       </div>
+      <form ng-submit="saveEditsComment(comment)">
+        <input class="edit" ng-trim="false" ng-model="comment.text" >
+      </form>
     </li>
   </ul>
+</section>
   <form ng-submit="saveComment(selectedTodo.id)">
     <input placeholder="Add Comment" ng-model = "newComment" autofocus>
   </form>
